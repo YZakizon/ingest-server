@@ -73,23 +73,7 @@ REDIS_CACHE_PORT=6379
 
 ---
 
-## Database Schema
 
-The ingestion pipeline requires the `runs` table.  
-This is created via `migration.sql`:
-
-```sql
-CREATE TABLE IF NOT EXISTS runs (
-    id UUID PRIMARY KEY,
-    trace_id UUID NOT NULL,
-    name TEXT NOT NULL,
-    batch_key TEXT NOT NULL,
-    byte_offset BIGINT NOT NULL,
-    byte_length INT NOT NULL
-);
-```
-
----
 
 ## Makefile Commands
 
@@ -152,6 +136,12 @@ These benchmarks measure:
 
 ## Running the Server
 
+Run the database server and minio server:
+
+```
+docker compose -f docker-compose.yml up -d
+```
+
 ```
 go run ./cmd/server
 ```
@@ -170,7 +160,7 @@ Accepts run metadata and payload, writes metadata to Postgres, uploads payload t
 
 ```
 make testenv
-make bench-int
+make benchmark
 ```
 
 4. Iterate on ingestion performance
@@ -210,10 +200,24 @@ brew install minio/stable/mc
 Build the Go binary:
 
 ```bash
+make build
+```
+
+This is similar to run this command below 
+and will generate executable `run-handler`:
+
+```bash
 go build -o run-handler ./cmd/server
 ```
 
+
 Or run directly:
+
+```bash
+make run
+```
+
+this runs:
 
 ```bash
 go run ./cmd/server

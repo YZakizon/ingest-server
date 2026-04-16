@@ -27,9 +27,21 @@ minio-bucket:
 	@echo "Creating bucket '$(S3_BUCKET_NAME)' if missing..."
 	@mc ls $(MC_ALIAS)/$(S3_BUCKET_NAME) >/dev/null 2>&1 || mc mb $(MC_ALIAS)/$(S3_BUCKET_NAME)
 
+build:
+	@echo "Building run-handler binary..."
+	@go build -o run-handler ./cmd/server
+
+run:
+	@echo "Starting go run server..."
+	@go run ./cmd/server
+
 testenv: dropdb createdb migrate minio-bucket
 	@echo "Test environment ready."
 
+test:
+	@echo "Running tests..."
+	@go test ./...
+
 benchmark: testenv
 	@echo "Running integration benchmarks..."
-	go test ./tests -bench=CreateRunsReal -run=^$
+	@go test ./tests -bench=CreateRunsReal -run=^$
