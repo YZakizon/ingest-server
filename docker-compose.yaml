@@ -1,0 +1,47 @@
+services:
+  db-postgres-15:
+    image: postgres:15.10
+    shm_size: 1g
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  minio:
+    image: minio/minio
+    command: server /data --address :9000 --console-address :9001
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin1
+      MINIO_ROOT_PASSWORD: minioadmin1
+    volumes:
+      - ./.data/minio:/data
+    restart: always
+
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey-langchain
+    restart: always
+    ports:
+      - "6379:6379"
+    command: >
+      valkey-server
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - valkey_data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+
+volumes:
+  postgres_data:
+  valkey_data:
